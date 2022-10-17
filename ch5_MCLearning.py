@@ -5,9 +5,10 @@ class GridWorld():
     def __init__(self):
         self.x=0
         self.y=0
-    
+    #액션을 받아서 상태 변이를 일으키고 보상을 정해주는 함수
     def step(self, a):
         # 0번 액션: 왼쪽, 1번 액션: 위, 2번 액션: 오른쪽, 3번 액션: 아래쪽
+        # list로 원소를 접근하기 위해 다음과 같이 설정
         if a==0:
             self.move_left()
         elif a==1:
@@ -21,21 +22,22 @@ class GridWorld():
         done = self.is_done()
         return (self.x, self.y), reward, done
 
+    # y축 +1
     def move_right(self):
         self.y += 1  
         if self.y > 3:
             self.y = 3
-      
+    # y축 -1
     def move_left(self):
         self.y -= 1
         if self.y < 0:
             self.y = 0
-      
+    # x축 -1
     def move_up(self):
         self.x -= 1
         if self.x < 0:
             self.x = 0
-  
+    # x측 +1
     def move_down(self):
         self.x += 1
         if self.x > 3:
@@ -84,16 +86,18 @@ def main():
         done = False
         history = []
 
-        while not done:
-            action = agent.select_action()
+        #에이전트가 경험 쌓음 (한번의 에피소드 진행)
+        while not done:  #true가 될 때까지
+            action = agent.select_action() #0,1,2,3중 하나 선택
             (x,y), reward, done = env.step(action)
             history.append((x,y,reward))
         env.reset()
 
         cum_reward = 0
-        for transition in history[::-1]:
-            x, y, reward = transition
-            data[x][y] = data[x][y] + alpha*(cum_reward-data[x][y])
+        
+        for transition in history[::-1]: #경험을 이용해 테이블 업데이트(마지막 제외)
+            x, y, reward = transition 
+            data[x][y] = data[x][y] + alpha*(cum_reward-data[x][y]) #state값 update
             cum_reward = reward + gamma*cum_reward  # 책에 오타가 있어 수정하였습니다
             
     for row in data:

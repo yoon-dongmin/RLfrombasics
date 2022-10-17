@@ -79,15 +79,16 @@ def main():
     data = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
     gamma = 1.0
     reward = -1
-    alpha = 0.01
+    alpha = 0.01 #MC에 비해 학습 변동성이 작아 큰 폭의 업데이트가 가능
 
     for k in range(50000):
-        done = False
+        done = False 
+        #한 에피소드가 끝나고 업데이트 되는것이 아니라, 한 번의 액션마다 데이터 테이블 업데이트
         while not done:
-            x, y = env.get_state()
+            x, y = env.get_state() #현재 sate의 x,y값
             action = agent.select_action()
-            (x_prime, y_prime), reward, done = env.step(action)
-            x_prime, y_prime = env.get_state()
+            (x_prime, y_prime), reward, done = env.step(action) #action을 하였을 때 x,y값
+            #x_prime, y_prime = env.get_state()
             data[x][y] = data[x][y] + alpha*(reward+gamma*data[x_prime][y_prime]-data[x][y])
         env.reset()
             

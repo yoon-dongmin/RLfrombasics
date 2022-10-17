@@ -6,6 +6,7 @@ class GridWorld():
         self.x=0
         self.y=0
     
+
     def step(self, a):
         # 0번 액션: 왼쪽, 1번 액션: 위, 2번 액션: 오른쪽, 3번 액션: 아래쪽
         if a==0:
@@ -24,17 +25,17 @@ class GridWorld():
     def move_left(self):
         if self.y==0:
             pass
-        elif self.y==3 and self.x in [0,1,2]:
+        elif self.y==3 and self.x in [0,1,2]: #벽이 있는 경우
             pass
-        elif self.y==5 and self.x in [2,3,4]:
+        elif self.y==5 and self.x in [2,3,4]: #벽이 있는 경우
             pass
         else:
             self.y -= 1
 
     def move_right(self):
-        if self.y==1 and self.x in [0,1,2]:
+        if self.y==1 and self.x in [0,1,2]: #벽이 있는 경우
             pass
-        elif self.y==3 and self.x in [2,3,4]:
+        elif self.y==3 and self.x in [2,3,4]: #벽이 있는 경우
             pass
         elif self.y==6:
             pass
@@ -74,41 +75,53 @@ class QAgent():
         self.eps = 0.9 
         self.alpha = 0.01
         
+    #상태 s를 입력으로 받아 s에서 알맞은 액션을 입실론 그리디 방식을 통해 선택
     def select_action(self, s):
         # eps-greedy로 액션을 선택
         x, y = s
         coin = random.random()
-        if coin < self.eps:
-            action = random.randint(0,3)
-        else:
-            action_val = self.q_table[x,y,:]
-            action = np.argmax(action_val)
+        if coin < self.eps: #처음에 0.1
+            action = random.randint(0,3)  #Random한 action 선택
+        else: #처음에 0.9 점점 증가 
+            action_val = self.q_table[x,y,:] #해당 state에 해당하는 action들 가져옴
+            action = np.argmax(action_val) #가장 큰 action 선택 
         return action
 
+    '''
+    a = list(range(10))
+    >>> a
+    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    >>> a[:-1]
+    [0, 1, 2, 3, 4, 5, 6, 7, 8]
+    >>> a[::-1]
+    [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+    >>> a[:-1:-1]
+    []
+    '''
     def update_table(self, history):
         # 한 에피소드에 해당하는 history를 입력으로 받아 q 테이블의 값을 업데이트 한다
         cum_reward = 0
-        for transition in history[::-1]:
+        for transition in history[::-1]: #뒤에서부터
             s, a, r, s_prime = transition
             x,y = s
-            # 몬테 카를로 방식을 이용하여 업데이트.
+            # 몬테 카를로 방식을 이용하여 업데이트. action값도 추가적으로 입력으로 넣음
             self.q_table[x,y,a] = self.q_table[x,y,a] + self.alpha * (cum_reward - self.q_table[x,y,a])
             cum_reward = cum_reward + r 
 
     def anneal_eps(self):
         self.eps -= 0.03
-        self.eps = max(self.eps, 0.1)
+        self.eps = max(self.eps, 0.01) #0.9에서 0.01까지 줄어듬
 
     def show_table(self):
         # 학습이 각 위치에서 어느 액션의 q 값이 가장 높았는지 보여주는 함수
-        q_lst = self.q_table.tolist()
+        q_lst = self.q_table.tolist() #numpy -> list
         data = np.zeros((5,7))
-        for row_idx in range(len(q_lst)):
-            row = q_lst[row_idx]
-            for col_idx in range(len(row)):
-                col = row[col_idx]
-                action = np.argmax(col)
-                data[row_idx, col_idx] = action
+        for row_idx in range(len(q_lst)): #5
+            row = q_lst[row_idx] #7x4 matrix
+            for col_idx in range(len(row)): #7
+                col = row[col_idx] #1x4 matrix
+                action = np.argmax(col) #가장 큰 값(action)을 가져옴
+                data[row_idx, col_idx] = action # data에 저장
         print(data)
       
 def main():
@@ -122,9 +135,9 @@ def main():
         s = env.reset()
         while not done: # 한 에피소드가 끝날 때 까지
             a = agent.select_action(s)
-            s_prime, r, done = env.step(a)
-            history.append((s, a, r, s_prime))
-            s = s_prime
+            s_prime, r, done = env.step(a) #s_prime:(x_prime,y_prime)
+            history.append((s, a, r, s_prime)) # history에 값 저장
+            s = s_prime #x,y값 update
         agent.update_table(history) # 히스토리를 이용하여 에이전트를 업데이트
         agent.anneal_eps()
 

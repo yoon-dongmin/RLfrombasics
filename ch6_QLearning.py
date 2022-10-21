@@ -89,7 +89,7 @@ class QAgent():
         x,y = s
         next_x, next_y = s_prime
         a_prime = self.select_action(s_prime) # S'에서 선택할 액션 (실제로 취한 액션이 아님)
-        # Q러닝 업데이트 식을 이용 
+        # Q러닝 업데이트 식을 이용 #벨만 최적 방정식 (가장 높은 밸류를 가지는 액션 선택)
         self.q_table[x,y,a] = self.q_table[x,y,a] + 0.1 * (r + np.amax(self.q_table[next_x,next_y,:]) - self.q_table[x,y,a])
 
     def anneal_eps(self):
@@ -108,6 +108,7 @@ class QAgent():
         print(data)
       
 
+#행동정책과 타깃 정책이 다르다
 def main():
     env = GridWorld()
     agent = QAgent()

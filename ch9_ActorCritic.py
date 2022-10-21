@@ -6,9 +6,11 @@ import torch.optim as optim
 from torch.distributions import Categorical
 
 #Hyperparameters
+#밸류 네트워크가 평가를 대신 해주기 때문에 리턴을 필요로 하지 않음
+
 learning_rate = 0.0002
 gamma         = 0.98
-n_rollout     = 10
+n_rollout     = 10 #몇 틱의 데이터를 쌓아서 업데이트 할지 => 10번
 
 class ActorCritic(nn.Module):
     def __init__(self):
@@ -19,7 +21,8 @@ class ActorCritic(nn.Module):
         self.fc_pi = nn.Linear(256,2)
         self.fc_v = nn.Linear(256,1)
         self.optimizer = optim.Adam(self.parameters(), lr=learning_rate)
-        
+
+    #액션을 뽑고,환경에 던져주고, 상태 전이와 보상을 관찰 
     def pi(self, x, softmax_dim = 0):
         x = F.relu(self.fc1(x))
         x = self.fc_pi(x)
@@ -31,9 +34,11 @@ class ActorCritic(nn.Module):
         v = self.fc_v(x)
         return v
     
+    #값들 저장
     def put_data(self, transition):
         self.data.append(transition)
-        
+    
+    #미니 배치를 만듦
     def make_batch(self):
         s_lst, a_lst, r_lst, s_prime_lst, done_lst = [], [], [], [], []
         for transition in self.data:
@@ -58,7 +63,8 @@ class ActorCritic(nn.Module):
         
         pi = self.pi(s, softmax_dim=1)
         pi_a = pi.gather(1,a)
-        loss = -torch.log(pi_a) * delta.detach() + F.smooth_l1_loss(self.v(s), td_target.detach())
+        #gradient accent를 사용하기 위해 -부호를 붙임
+        loss = -torch.log(pi_a) * delta.detach() + F.smooth_l1_loss(self.v(s), td_target.detach()) #detach()가 붙는 이유는 delta를 상수 취급하기 위해서
 
         self.optimizer.zero_grad()
         loss.mean().backward()
@@ -86,8 +92,8 @@ def main():
                 
                 if done:
                     break                     
-            
-            model.train_net()
+             
+            model.train_net() #10번 loop 진행한 후 학습진행
             
         if n_epi%print_interval==0 and n_epi!=0:
             print("# of episode :{}, avg score : {:.1f}".format(n_epi, score/print_interval))

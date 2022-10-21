@@ -110,7 +110,7 @@ class QAgent():
 
     def anneal_eps(self):
         self.eps -= 0.03
-        self.eps = max(self.eps, 0.01) #0.9에서 0.01까지 줄어듬
+        self.eps = max(self.eps, 0.1) #0.9에서 0.01까지 줄어듬
 
     def show_table(self):
         # 학습이 각 위치에서 어느 액션의 q 값이 가장 높았는지 보여주는 함수
@@ -139,7 +139,7 @@ def main():
             history.append((s, a, r, s_prime)) # history에 값 저장
             s = s_prime #x,y값 update
         agent.update_table(history) # 히스토리를 이용하여 에이전트를 업데이트
-        agent.anneal_eps()
+        agent.anneal_eps() #eps값 조절 
 
     agent.show_table() # 학습이 끝난 결과를 출력
 

@@ -116,9 +116,9 @@ def main():
         done = False
 
         s = env.reset()
-        while not done:
+        while not done: #한 에피소드가 끝날 때까지
             a = agent.select_action(s)
-            s_prime, r, done = env.step(a)
+            s_prime, r, done = env.step(a) #r은 -1고정
             agent.update_table((s,a,r,s_prime))
             s = s_prime
         agent.anneal_eps()

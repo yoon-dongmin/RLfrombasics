@@ -95,7 +95,7 @@ def main():
 
         cum_reward = 0
         
-        for transition in history[::-1]: #경험을 이용해 테이블 업데이트(마지막 제외)
+        for transition in history[::-1]: #경험을 이용해 테이블 업데이트(뒤에서 부터)
             x, y, reward = transition 
             data[x][y] = data[x][y] + alpha*(cum_reward-data[x][y]) #state값 update
             cum_reward = reward + gamma*cum_reward  # 책에 오타가 있어 수정하였습니다

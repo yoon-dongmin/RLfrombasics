@@ -84,7 +84,7 @@ def main():
     for k in range(50000):
         done = False 
         #한 에피소드가 끝나고 업데이트 되는것이 아니라, 한 번의 액션마다 데이터 테이블 업데이트
-        while not done:
+        while not done: #한 에피소드가 끝날 때까지
             x, y = env.get_state() #현재 sate의 x,y값
             action = agent.select_action()
             (x_prime, y_prime), reward, done = env.step(action) #action을 하였을 때 x,y값
